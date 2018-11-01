@@ -67,7 +67,7 @@ int modoInterativo() {
     soma = mat1 + mat2 + mat3;
     inicio = soma % n;
     printf("======================================\n");
-    printf("Matricula 1: %d\nMatricula 2: %d\nMatricula 3:%d\n", mat1, mat2, mat3);
+    printf("Matricula 1: %d\nMatricula 2: %d\nMatricula 3: %d\n", mat1, mat2, mat3);
     printf("======================================\n");
     printf("======================================\n");
     printf("Qtd de cidades: %d\n", n);
