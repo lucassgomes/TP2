@@ -15,7 +15,7 @@ int geraAleatorio();
 int *alocaVetor(int n);
 void trocaElemento(int *v, int i, int j);
 void inicializaVetor(int *v, int n);
-void permuta(int *v, int n, int i, int cidadeInicial, int matriz[n][n], int *dMenor);
+void permuta(int *v, int n, int i, int cidadeInicial, int matriz[n][n], int *dMenor, int vetorDistancia[]);
 
 /**
  * Função responsável pela escolha do modo de execução do programa
@@ -26,12 +26,14 @@ void permuta(int *v, int n, int i, int cidadeInicial, int matriz[n][n], int *dMe
 void escolhaModo() {
     int opcaoModo = 0, erroI, erroA;
     while (opcaoModo == 0) {
-        printf("Como deseja executar: \n1 - Interativo\n2 - Arquivo\nEntre com sua opção: ");
+        printf("Como deseja executar: \n1 - Interativo\n2 - Arquivo\n3 - Sair\nEntre com sua opção: ");
         scanf("%d", &opcaoModo);
         if (opcaoModo == 1) {
             erroI = modoInterativo();
         } else if (opcaoModo == 2) {
             erroA = modoArquivo();
+        } else if (opcaoModo == 3) {
+            break;
         } else {
             printf("Entre com uma opção válida!\n");
             opcaoModo = 0;
@@ -41,14 +43,18 @@ void escolhaModo() {
 }
 
 int modoInterativo() {
-    clock_t tempoI, tempoF;
-    double tempoTot;
+    clock_t Ticks[2];
     int menorDistancia = INT_MAX;
     int *v, n, i, j, mat1, mat2, mat3, soma, inicio;
+    printf("Digite a matrícula 1: ");
+    scanf("%d", &mat1);
+    printf("Digite a matrícula 2: ");
+    scanf("%d", &mat2);
+    printf("Digite a matrícula 3: ");
+    scanf("%d", &mat3);
     printf("Digite a quantidade de cidades: ");
     scanf("%d", &n);
-    tempoI = clock();
-    int matriz[n][n];
+    int matriz[n][n], vetorDistancia[n];
     for (i = 1; i <= n; i++) {
         for (j = 1; j <= n; j++) {
             if (i != j) {
@@ -58,29 +64,43 @@ int modoInterativo() {
             }
         }
     }
-    printf("Digite a matrícula 1: ");
-    scanf("%d", &mat1);
-    printf("Digite a matrícula 2: ");
-    scanf("%d", &mat2);
-    printf("Digite a matrícula 3: ");
-    scanf("%d", &mat3);
-    printf("\n\n\nMATRIZ GERADA\n\n");
+    soma = mat1 + mat2 + mat3;
+    inicio = soma % n;
+    printf("======================================\n");
+    printf("Matricula 1: %d\nMatricula 2: %d\nMatricula 3:%d\n", mat1, mat2, mat3);
+    printf("======================================\n");
+    printf("======================================\n");
+    printf("Qtd de cidades: %d\n", n);
+    printf("======================================\n");
+    printf("Cidade Inicial: %d\n", inicio);
+    printf("======================================\n");
+    v = alocaVetor(n);
+    inicializaVetor(v, n);
+    Ticks[0] = clock();
+    permuta(v, n, 0, inicio, matriz, &menorDistancia, vetorDistancia);
+    Ticks[1] = clock();
+    double Tempo = (Ticks[1] - Ticks[0]) * 1000.0 / CLOCKS_PER_SEC;
+    printf("======================================\n");
+    printf("Matriz Distancia\n");
+    printf("======================================\n");
     for (i = 1; i <= n; i++) {
         for (j = 1; j <= n; j++) {
             printf("%d ", matriz[i][j]);
         }
         printf("\n");
     }
-    v = alocaVetor(n);
-    inicializaVetor(v, n);
-    soma = mat1 + mat2 + mat3;
-    inicio = soma % n;
-    printf("\n\n");
-    permuta(v, n, 0, inicio, matriz, &menorDistancia);
-    tempoF = clock();
-    tempoTot = ((double) (tempoF - tempoI)) / CLOCKS_PER_SEC;
-    printf("O tempo total é: %.4lf segundos\n\n", tempoTot);
-    printf("A menor distância é: %d\n", menorDistancia);
+    printf("======================================\n");
+    printf("A menor distância foi: %d\n", menorDistancia);
+    printf("======================================\n");
+    printf("Sequencia de cidade percorridas\n");
+    for(i=0;i<n;i++){
+        printf("%d ", vetorDistancia[i]);
+    }
+    printf("%d\n", inicio);
+    printf("======================================\n");
+    printf("Tempo de execução: %g ms\n", Tempo);
+    printf("======================================\n");
+    escolhaModo();
     return 0;
 }
 
@@ -89,12 +109,11 @@ int modoInterativo() {
  * @return int 0 caso erro ou 1 caso sucesso
  */
 int modoArquivo() {
-    clock_t tempoI, tempoF;
+    clock_t Ticks[2];
     int menorDistancia = INT_MAX;
     char nomeArquivo[255];
     int mat[3], i, j, n;
     int *v, soma = 0, cidadeInicial = 0;
-    double tempoTot;
     FILE *arquivo = NULL;
     printf("Entre com o caminho e a extensão do arquivo: ");
     scanf(" %s", nomeArquivo);
@@ -109,7 +128,7 @@ int modoArquivo() {
             soma += mat[i];
         }
         fscanf(arquivo, "%d", &n);
-        int matriz[n][n];
+        int matriz[n][n], vetorDistancia[n];
         for (i = 1; i <= n; i++) {
             for (j = 1; j <= n; j++) {
                 if (i == j) {
@@ -121,19 +140,43 @@ int modoArquivo() {
         }
         cidadeInicial = soma % n;
         if (cidadeInicial == 0) cidadeInicial = 1;
-        tempoI = clock();
         v = alocaVetor(n);
         inicializaVetor(v, n);
+        printf("\n======================================\n");
         for (i = 0; i < 3; i++) {
             printf("Matricula %d: %d\n", i + 1, mat[i]);
         }
-        printf("Cidade inicial: %d\n", cidadeInicial);
+        printf("======================================\n");
+        printf("======================================\n");
         printf("Qtd de cidades: %d\n", n);
-        permuta(v, n, 0, cidadeInicial, matriz, &menorDistancia);
-        tempoF = clock();
-        tempoTot = (((double) tempoF - tempoI) / CLOCKS_PER_SEC);
-        printf("O tempo total é: %.4lf segundos\n\n", tempoTot);
-        printf("A menor distância é: %d\n", menorDistancia);
+        printf("======================================\n");
+        printf("======================================\n");
+        printf("Cidade Inicial: %d\n", cidadeInicial);
+        printf("======================================\n");
+        Ticks[0] = clock();
+        permuta(v, n, 0, cidadeInicial, matriz, &menorDistancia, vetorDistancia);
+        Ticks[1] = clock();
+        double Tempo = (Ticks[1] - Ticks[0]) * 1000.0 / CLOCKS_PER_SEC;
+        printf("======================================\n");
+        printf("Matriz Distancia\n");
+        printf("======================================\n");
+        for (i = 1; i <= n; i++) {
+            for (j = 1; j <= n; j++) {
+                printf("%d ", matriz[i][j]);
+            }
+            printf("\n");
+        }
+        printf("======================================\n");
+        printf("A menor distancia foi: %d\n", menorDistancia);
+        printf("======================================\n");
+        printf("Sequencia de cidades pecorridas\n");
+        for (i = 0; i < n; i++) {
+            printf("%d ", vetorDistancia[i]);
+        }
+        printf("%d\n", cidadeInicial);
+        printf("======================================\n");
+        printf("Tempo de execução: %g ms\n3", Tempo);
+        printf("======================================\n");
         escolhaModo();
         return 0;
     }
@@ -194,7 +237,7 @@ void inicializaVetor(int *v, int n) {
  * @param matriz int matriz gerada aleatoriamente anteriormente
  * @param dMenor int ponteiro para a medida de menor distância
  */
-void permuta(int *v, int n, int i, int cidadeInicial, int matriz[n][n], int *dMenor) {
+void permuta(int *v, int n, int i, int cidadeInicial, int matriz[n][n], int *dMenor, int vetorDistancia[]) {
     int menorD;
     int j;
     int soma = 0;
@@ -208,16 +251,19 @@ void permuta(int *v, int n, int i, int cidadeInicial, int matriz[n][n], int *dMe
                 soma += matriz[v[j]][v[j + 1]];
             }
             soma += matriz[v[n - 1]][v[0]];
-            printf("-> %d\n", soma);
+            printf("- Distancia %d\n", soma);
             menorD = soma;
             if (*dMenor > menorD) {
                 *dMenor = menorD;
+                for (j = 0; j < n; j++) {
+                    vetorDistancia[j] = v[j];
+                }
             }
         }
     } else {
         for (j = i; j < n; j++) {
             trocaElemento(v, i, j);
-            permuta(v, n, i + 1, cidadeInicial, matriz, dMenor);
+            permuta(v, n, i + 1, cidadeInicial, matriz, dMenor, vetorDistancia);
             trocaElemento(v, i, j);
         }
     }
